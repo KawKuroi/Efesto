@@ -96,9 +96,17 @@ async function handleLogin() {
   if (selection.trim() === '1') {
     keyName = 'GEMINI_API_KEY';
     providerName = 'Google Gemini';
+    console.log(pc.cyan('\nInformación de Google Gemini:'));
+    console.log(pc.gray('Las suscripciones de chat web (como Gemini Advanced) no tienen APIs directas para CLI.'));
+    console.log(pc.gray('¡Pero no te preocupes! Google ofrece una API Key 100% gratuita para desarrollo en AI Studio.'));
+    console.log(pc.white('Puedes obtener tu API Key gratuita en: https://aistudio.google.com/'));
   } else if (selection.trim() === '2') {
     keyName = 'ANTHROPIC_API_KEY';
     providerName = 'Anthropic Claude';
+    console.log(pc.cyan('\nInformación de Anthropic Claude:'));
+    console.log(pc.gray('Las suscripciones web (Claude Pro) no tienen APIs directas para CLI.'));
+    console.log(pc.gray('Debes crear una cuenta en la Consola de Anthropic para obtener una API Key de desarrollo.'));
+    console.log(pc.white('Puedes obtener tu API Key en: https://console.anthropic.com/'));
   } else {
     console.log(pc.gray('Operación cancelada.'));
     return;
@@ -366,6 +374,10 @@ async function mainLoop() {
   // Verificación proactiva de credenciales al iniciar
   if (!process.env.GEMINI_API_KEY) {
     console.log(pc.yellow('\n[Aviso] No se detectó ninguna API Key de Gemini.'));
+    console.log(pc.gray('Nota: Las suscripciones de chat web (Gemini Advanced / Claude Pro) no tienen APIs directas.'));
+    console.log(pc.gray('¡Pero no te preocupes! Puedes obtener una API Key 100% gratuita para desarrollo en:'));
+    console.log(pc.cyan('https://aistudio.google.com/'));
+    console.log();
     const answer = await askQuestion(pc.cyan('¿Deseas configurar tus credenciales ahora de forma interactiva? (s/n) > '));
     if (answer.trim().toLowerCase() === 's' || answer.trim().toLowerCase() === 'si' || answer.trim().toLowerCase() === 'y') {
       await handleLogin();
