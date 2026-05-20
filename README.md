@@ -29,7 +29,7 @@ Ejecuta en la raíz de este directorio:
 npm install
 npm link
 ```
-Esto habilitará el comando global **`efesto`** (y su alias legacy **`sama`**) en tu consola de comandos.
+Esto habilitará el comando global **`efesto`** en tu consola de comandos.
 
 ### 2. Configuración de API Keys
 En el primer inicio, el CLI creará automáticamente la carpeta `~/.efesto` en tu directorio de usuario. Abre el archivo `.env` generado e introduce tus claves:
