@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+jspm_packages/
+
+# Variables de entorno y llaves privadas
+.env
+.env.local
+.env.*.local
+
+# Temporales de EFESTO
+.efesto_commit_msg.tmp
+.sama_commit_msg.tmp
+/docs/ACTIVE_TASK.md
+/docs/ACTIVE_TASK_PAUSED.md
+/docs/FINISHED_TASK_*.md
+
+# Logs y Depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Archivos de Sistema Operativo
+.DS_Store
+Thumbs.db
