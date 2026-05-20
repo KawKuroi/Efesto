@@ -77,8 +77,71 @@ async function printHeader() {
   console.log(`  ${pc.cyan('/task [texto]')}   - Iniciar el ciclo autónomo para una nueva Feature o Bug`);
   console.log(`  ${pc.cyan('/hotfix [texto]')} - Pausar tarea activa y resolver un bug crítico prioritario`);
   console.log(`  ${pc.cyan('/status')}         - Ver el estado de los archivos de documentación`);
+  console.log(`  ${pc.cyan('/login')}          - Iniciar sesión o configurar tus API Keys de Gemini y Claude`);
   console.log(`  ${pc.cyan('/exit')}           - Salir de la aplicación`);
   console.log(pc.cyan('========================================================================\n'));
+}
+
+async function handleLogin() {
+  console.log(pc.yellow('\n[Configuración de Credenciales]'));
+  console.log('Selecciona el proveedor para configurar su API Key:');
+  console.log('  1. Google Gemini (GEMINI_API_KEY)');
+  console.log('  2. Anthropic Claude (ANTHROPIC_API_KEY)');
+  console.log('  3. Cancelar');
+  
+  const selection = await askQuestion(pc.cyan('\nOpción > '));
+  let keyName = '';
+  let providerName = '';
+  
+  if (selection.trim() === '1') {
+    keyName = 'GEMINI_API_KEY';
+    providerName = 'Google Gemini';
+  } else if (selection.trim() === '2') {
+    keyName = 'ANTHROPIC_API_KEY';
+    providerName = 'Anthropic Claude';
+  } else {
+    console.log(pc.gray('Operación cancelada.'));
+    return;
+  }
+  
+  console.log(pc.gray(`\nIntroduce tu API Key para ${providerName}:`));
+  const newKey = await askQuestion(pc.cyan('API Key > '));
+  
+  if (!newKey.trim()) {
+    console.log(pc.red('[Error] La API Key no puede estar vacía.'));
+    return;
+  }
+  
+  try {
+    let envContent = '';
+    if (fs.existsSync(globalEnvPath)) {
+      envContent = fs.readFileSync(globalEnvPath, 'utf-8');
+    }
+    
+    const lines = envContent.split(/\r?\n/);
+    let keyUpdated = false;
+    const updatedLines = lines.map(line => {
+      if (line.trim().startsWith(`${keyName}=`)) {
+        keyUpdated = true;
+        return `${keyName}=${newKey.trim()}`;
+      }
+      return line;
+    });
+    
+    if (!keyUpdated) {
+      updatedLines.push(`${keyName}=${newKey.trim()}`);
+    }
+    
+    fs.writeFileSync(globalEnvPath, updatedLines.join('\n'), 'utf-8');
+    
+    // Cargar inmediatamente en process.env
+    process.env[keyName] = newKey.trim();
+    console.log(pc.green(`\n[OK] ¡API Key de ${providerName} configurada y cargada con éxito!`));
+    await askQuestion(pc.cyan('\nPresiona Enter para continuar...'));
+  } catch (e) {
+    console.log(pc.red(`\n[Error] No se pudo guardar la API Key: ${e.message}`));
+    await askQuestion(pc.cyan('\nPresiona Enter para continuar...'));
+  }
 }
 
 async function handleInitializer() {
@@ -300,6 +363,15 @@ async function handleStatus() {
 }
 
 async function mainLoop() {
+  // Verificación proactiva de credenciales al iniciar
+  if (!process.env.GEMINI_API_KEY) {
+    console.log(pc.yellow('\n[Aviso] No se detectó ninguna API Key de Gemini.'));
+    const answer = await askQuestion(pc.cyan('¿Deseas configurar tus credenciales ahora de forma interactiva? (s/n) > '));
+    if (answer.trim().toLowerCase() === 's' || answer.trim().toLowerCase() === 'si' || answer.trim().toLowerCase() === 'y') {
+      await handleLogin();
+    }
+  }
+
   await printHeader();
   
   let running = true;
@@ -335,6 +407,11 @@ async function mainLoop() {
       case '/status':
         await handleStatus();
         break;
+      case '/login':
+      case '/config':
+        await handleLogin();
+        await printHeader();
+        break;
       case '/exit':
         console.log(pc.cyan('\n¡Gracias por usar EFESTO CLI! Hasta pronto.'));
         running = false;
@@ -342,7 +419,7 @@ async function mainLoop() {
         break;
       default:
         if (command) {
-          console.log(pc.red(`Comando no reconocido: "${command}". Escribe /start, /task, /hotfix, /status o /exit.`));
+          console.log(pc.red(`Comando no reconocido: "${command}". Escribe /start, /task, /hotfix, /status, /login o /exit.`));
         }
         break;
     }
